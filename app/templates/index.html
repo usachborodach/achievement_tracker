@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}achievement tracker{% endblock %}
+
+{% block extra_css %}
+    .navbar { background-color: #2d2d2d !important; border-bottom: 1px solid #3a3a3a; }
+    .navbar-brand, .navbar-text { color: #e0e0e0 !important; }
+
+    .card-header.text-center.fw-bold { font-weight: 600 !important; }
+    .achievement-text { resize: vertical; }
+
+    .text-muted { color: #888888 !important; }
+    .row-cols-md-3 .col { margin-bottom: 1rem; }
+
+    @media (max-width: 576px) {
+        .form-control { font-size: 0.9rem; }
+        .btn { font-size: 0.8rem; }
+    }
+
+    .save-indicator {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-left: 10px;
+    }
+    .save-indicator.saved  { color: #28a745; }
+    .save-indicator.saving { color: #ffc107; }
+{% endblock %}
+
+{% block body %}
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <span class="navbar-brand">achievement tracker</span>
+        <div class="d-flex align-items-center">
+            <span class="navbar-text me-3">{{ date.strftime('%d.%m.%Y') }}</span>
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">Выйти</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-3">
+    <!-- Навигация по дням -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="btn-group w-100" role="group">
+                <a href="{{ url_for('main.index', date=(date - timedelta(days=1)).strftime('%Y-%m-%d')) }}"
+                   class="btn btn-outline-secondary">&laquo; Предыдущий</a>
+                <a href="{{ url_for('main.index') }}" class="btn btn-outline-primary">Сегодня</a>
+                <a href="{{ url_for('main.index', date=(date + timedelta(days=1)).strftime('%Y-%m-%d')) }}"
+                   class="btn btn-outline-secondary">Следующий &raquo;</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Три колонки -->
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for key, label in categories.items() %}
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header text-center fw-bold">{{ label }}</div>
+                <div class="card-body">
+                    <textarea class="form-control achievement-text"
+                              data-category="{{ key }}" rows="10"
+                              placeholder="Введите достижения за день...">{{ doc[key] or '' }}</textarea>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Индикатор и кнопка -->
+    <div class="row mt-3">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <span id="saveIndicator" class="save-indicator">✔ Всё сохранено</span>
+            <button id="saveAllBtn" class="btn btn-success btn-sm">Сохранить всё</button>
+        </div>
+    </div>
+
+    <div class="text-muted small mt-2">
+        <i>Изменения сохраняются автоматически через 1 секунду после окончания ввода.</i>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const date = '{{ date.strftime("%Y-%m-%d") }}';
+        const textareas = document.querySelectorAll('.achievement-text');
+        const indicator = document.getElementById('saveIndicator');
+
+        function saveCategory(category, text) {
+            return fetch('/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date: date, category: category, text: text })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) {
+                    console.warn('Ошибка сохранения для', category, data.message);
+                    return false;
+                }
+                return true;
+            })
+            .catch(error => {
+                console.error('Ошибка сети:', error);
+                return false;
+            });
+        }
+
+        function setIndicator(state, message) {
+            indicator.textContent = message;
+            indicator.className = 'save-indicator ' + state;
+        }
+
+        document.getElementById('saveAllBtn').addEventListener('click', function() {
+            setIndicator('saving', '⏳ Сохранение...');
+            const promises = [];
+            textareas.forEach(ta => {
+                promises.push(saveCategory(ta.dataset.category, ta.value));
+            });
+            Promise.all(promises).then(results => {
+                if (results.every(r => r === true)) {
+                    setIndicator('saved', '✔ Всё сохранено');
+                } else {
+                    setIndicator('', '⚠ Часть данных не сохранена (см. консоль)');
+                }
+            });
+        });
+
+        let timeout = null;
+        textareas.forEach(ta => {
+            ta.addEventListener('input', function() {
+                clearTimeout(timeout);
+                setIndicator('saving', '⏳ Сохранение...');
+                const category = this.dataset.category;
+                const text = this.value;
+                timeout = setTimeout(() => {
+                    saveCategory(category, text).then(success => {
+                        setIndicator(
+                            success ? 'saved' : '',
+                            success ? '✔ Всё сохранено' : '⚠ Ошибка сохранения'
+                        );
+                    });
+                }, 1000);
+            });
+        });
+
+        setIndicator('saved', '✔ Всё сохранено');
+    });
+</script>
+{% endblock %}

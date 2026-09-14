@@ -1,5 +1,6 @@
-from pymongo import MongoClient, ASCENDING
+"""Standalone-вариант создания индекса (без Flask)."""
 import os
+from pymongo import MongoClient, ASCENDING
 from dotenv import load_dotenv
 
 load_dotenv()
