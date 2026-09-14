@@ -32,13 +32,15 @@ python run.py
 ```bash
 mkdir -p /var/log/achievement_tracker
 
-ln -sf /root/achievement_tracker/deploy/achievement_tracker.service \
-       /etc/systemd/system/achievement_tracker.service
+ln -sf \
+  /root/achievement_tracker/deploy/achievement_tracker.service \
+  /etc/systemd/system/achievement_tracker.service
 systemctl daemon-reload
 systemctl enable --now achievement_tracker
 
-ln -sf /root/achievement_tracker/deploy/nginx.conf \
-       /etc/nginx/sites-enabled/achievement_tracker
+ln -sf \
+  /root/achievement_tracker/deploy/nginx.conf \
+  /etc/nginx/sites-enabled/achievement_tracker
 nginx -t && systemctl restart nginx
 
 # logrotate
@@ -46,10 +48,8 @@ ln -sf /root/achievement_tracker/deploy/achievement_tracker.logrotate \
        /etc/logrotate.d/achievement_tracker
 ```
 
-## Полезные команды
+## Запуск тестов
 
 ```bash
-flask --app wsgi create-index   # создать уникальный индекс на days.date
-pytest -q                       # запустить тесты
-journalctl -u achievement_tracker -f
+pytest -q
 ```
