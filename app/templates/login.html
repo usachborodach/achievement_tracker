@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}achievement tracker — вход{% endblock %}
+{% block title %}achievement_tracker login{% endblock %}
 
 {% block extra_css %}
     body { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
@@ -12,7 +12,7 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header text-center">
-                    <h4 class="text-light mb-0">achievement tracker</h4>
+                    <h4 class="text-light mb-0">achievement_tracker</h4>
                 </div>
                 <div class="card-body">
                     {% with messages = get_flashed_messages(with_categories=true) %}

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}achievement tracker{% endblock %}
+{% block title %}achievement_tracker{% endblock %}
 
 {% block extra_css %}
     .navbar { background-color: #2d2d2d !important; border-bottom: 1px solid #3a3a3a; }
@@ -29,7 +29,7 @@
 {% block body %}
 <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
-        <span class="navbar-brand">achievement tracker</span>
+        <span class="navbar-brand">achievement_tracker</span>
         <div class="d-flex align-items-center">
             <span class="navbar-text me-3">{{ date.strftime('%d.%m.%Y') }}</span>
             <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">Выйти</a>
