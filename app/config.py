@@ -26,8 +26,8 @@ class Config:
     RATELIMIT_STORAGE_URI = "memory://"
 
     CATEGORIES = {
-        'personal_coding': 'Кодил для себя',
-        'work': 'Работал',
+        'personal_coding': 'Развитие',
+        'work': 'Работа',
         'home_tasks': 'Домашние задачи',
     }
 
